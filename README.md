@@ -1,0 +1,4 @@
+ADMIN_PASSWORD=admin123
+ADMIN_ID=ADMIN100
+NEXT_PUBLIC_APP_URL=https://break-log-one.vercel.app
+MONGODB_URI=
