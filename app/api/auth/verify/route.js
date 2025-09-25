@@ -1,64 +1,79 @@
-// import { NextResponse } from "next/server";
-// import { MongoClient } from "mongodb";
+import { NextResponse } from "next/server";
+import { MongoClient } from "mongodb";
+import { sendWelcomeEmail } from "@/lib/emailService";
 
-// export async function POST(request) {
-//   const { email, code } = await request.json();
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
-//   try {
-//     const client = await MongoClient.connect(process.env.MONGODB_URI);
-//     const db = client.db();
-    
-//     const user = await db.collection("employees").findOne({ email });
-    
-//     if (!user) {
-//       client.close();
-//       return NextResponse.json(
-//         { message: "User not found" },
-//         { status: 404 }
-//       );
-//     }
+export async function POST(request) {
+  const { name, email, idCard, password, isRetry } = await request.json();
+  try {
+    const client = await MongoClient.connect(process.env.MONGODB_URI);
+    const db = client.db();
 
-//     // Check if code matches and hasn't expired
-//     const now = new Date();
-//     if (user.verificationCode === code && user.verificationExpires > now) {
-//       // Mark user as verified
-//       await db.collection("employees").updateOne(
-//         { email },
-//         { 
-//           $set: { 
-//             isVerified: true,
-//             verifiedAt: new Date()
-//           },
-//           $unset: {
-//             verificationCode: "",
-//             verificationExpires: ""
-//           }
-//         }
-//       );
+    // Check if user already exists in employees or pendingRegistrations
+    const existingUser = await db.collection("employees").findOne({ $or: [{ idCard }, { email }] });
+    const pendingUser = await db.collection("pendingRegistrations").findOne({ email });
 
-//       client.close();
-//       return NextResponse.json({
-//         message: "Email verified successfully",
-//         user: {
-//           id: user._id,
-//           name: user.name,
-//           email: user.email,
-//           idCard: user.idCard
-//         }
-//       });
-//     } else {
-//       client.close();
-//       return NextResponse.json(
-//         { message: "Invalid or expired verification code" },
-//         { status: 400 }
-//       );
-//     }
-    
-//   } catch (error) {
-//     console.error("Verification error:", error);
-//     return NextResponse.json(
-//       { message: "Internal server error" },
-//       { status: 500 }
-//     );
-//   }
-// }
+    if (isRetry) {
+      if (!pendingUser) {
+        client.close();
+        return NextResponse.json({ message: "No pending registration found for retry" }, { status: 404 });
+      }
+      const newCode = generateCode();
+      const newExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+      await db.collection("pendingRegistrations").updateOne(email, {
+      verificationCode: newCode,
+      verificationExpires: newExpiry,
+      updatedAt: new Date(),
+    });
+
+    await sendWelcomeEmail(email, name, newCode);
+
+    client.close();
+
+    return NextResponse.json(
+      { message: "Verification code sent", email },
+      { status: 201 }
+    );
+    }
+
+    if (existingUser || pendingUser) {
+      client.close();
+      return NextResponse.json(
+        { message: "User with this ID card or email already exists or is pending verification" },
+        { status: 409 }
+      );
+    }
+
+    const verificationCode = generateCode();
+    const verificationExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+
+    // Store registration data temporarily
+    await db.collection("pendingRegistrations").insertOne({
+      name,
+      email,
+      idCard,
+      password, // hash after verification
+      verificationCode,
+      verificationExpires,
+      createdAt: new Date(),
+    });
+
+    await sendWelcomeEmail(email, name, verificationCode);
+
+    client.close();
+
+    return NextResponse.json(
+      { message: "Verification code sent", email },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Registration error:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

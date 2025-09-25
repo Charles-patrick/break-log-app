@@ -92,7 +92,7 @@ export const Navbar = () => {
             alt="logo"
             width={70}
             height={40}
-            onClick={() => router.push("/")}
+            // onClick={() => router.push("/")}
             className="cursor-pointer hover:opacity-80 transition-opacity"
           />
         </section>
