@@ -13,7 +13,6 @@ export default function LoginPage() {
   const [adminPassword, setAdminPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isEmployeeLogin, setIsEmployeeLogin] = useState(true);
-  const [isRetry, setIsRetry] = useState(false);
   const [isVerificationPage, setIsVerificationPage] = useState(false);
   const [employeeData, setEmployeeData] = useState({
     name: "",
@@ -198,7 +197,6 @@ const handleRetry = async (e) => {
       body: JSON.stringify({
         email: registeredEmail,
         name: employeeData.name, 
-        isRetry: true,  
       }),
     });
 
@@ -314,6 +312,7 @@ const handleRetry = async (e) => {
               verificationCode={verificationCode}
               setVerificationCode={setVerificationCode}
               handleRetry={handleRetry}
+              setIsVerificationPage={setIsVerificationPage}
             />
         )}
       </div>

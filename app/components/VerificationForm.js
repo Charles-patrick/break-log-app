@@ -1,4 +1,5 @@
 import OtpInput from "react-otp-input";
+import { useState, useEffect } from "react";
 
 const VerificationForm = ({
   employeeData,
@@ -7,6 +8,7 @@ const VerificationForm = ({
   verificationCode,
   setVerificationCode,
   handleRetry,
+  setIsVerificationPage,
 }) => {
   return (
     <>
@@ -22,13 +24,20 @@ const VerificationForm = ({
             value={verificationCode}
             onChange={setVerificationCode}
             numInputs={6}
-            // separator={<span style={{ width: "8px" }}></span>}
-            // isInputNum={true}
             shouldAutoFocus={true}
             renderInput={(props) => (
               <input
                 {...props}
-                className="w-12 h-12 p-2 text-2xl text-center border-2 border-gray-300 rounded-lg focus:border-[#ec3338] focus:outline-none mx-1"
+                style={{ 
+                  width: 'clamp(30px, 10vw, 50px)',
+                  height: 'clamp(35px, 12vw, 60px)',
+                  fontSize: 'clamp(14px, 4vw, 24px)',
+                  margin: '0 0.2rem',
+                  textAlign: 'center',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '0.5rem',
+                }}
+                className="focus:border-[#ec3338] focus:outline-none"
                 disabled={isLoading}
               />
             )}
@@ -43,15 +52,16 @@ const VerificationForm = ({
           {isLoading ? "VERIFYING..." : "VERIFY"}
         </button>
       </form>
+
       <p className="text-center mt-4 text-gray-600">
         Code not delivered?{" "}
-        <button 
+        <button
           onClick={handleRetry}
           className="text-[#ec3338] hover:underline font-medium"
         >
           Resend verification code
         </button>
-      </p> 
+      </p>
     </>
   );
 };
