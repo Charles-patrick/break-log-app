@@ -21,7 +21,6 @@ export default function LoginPage() {
     email: "",
     idCard: "",
     password: "",
-    isRetry: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -144,7 +143,7 @@ export default function LoginPage() {
 
   const handleVerifyCode = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsVerifying(true);
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -178,7 +177,7 @@ export default function LoginPage() {
       console.error("Verification error:", error);
       toast.error("An error occurred. Please try again.");
     }
-    setIsLoading(false);
+    setIsVerifying(false);
   };
 
   const handleEmployeeChange = (e) => {
@@ -189,7 +188,7 @@ export default function LoginPage() {
   };
 const handleRetry = async (e) => {
   e.preventDefault();
-  setIsVerifying(true);
+    setIsLoading(true);
   try {
     const response = await fetch("/api/auth/resendmail", {
       method: "POST",
@@ -212,7 +211,7 @@ const handleRetry = async (e) => {
   } catch (error) {
     console.error("Error resending email:", error);
   }
-  setIsVerifying(false);
+  setIsLoading(false);
 };
 
   const toggleEmployeeMode = () => {

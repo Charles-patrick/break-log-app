@@ -64,7 +64,7 @@ const VerificationForm = ({
 
         <button
           type="submit"
-          disabled={isLoading || verificationCode.length !== 6}
+          disabled={isVerifying || verificationCode.length !== 6}
           className="w-full bg-[#ec3338] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#dc2626] transition-colors duration-200 disabled:bg-[#f8b4b4] disabled:cursor-not-allowed"
         >
           {isVerifying ? "VERIFYING..." : "VERIFY"}
@@ -79,7 +79,7 @@ const VerificationForm = ({
             className="text-[#ec3338] hover:underline font-medium"
             disabled={isLoading}
           >
-            Resend Verification Code
+            {isLoading ? "Resending..." : "Resend Verification Code"}
           </button>
         ) : (
           <span>
