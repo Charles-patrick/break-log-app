@@ -14,6 +14,8 @@ export default function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isEmployeeLogin, setIsEmployeeLogin] = useState(true);
   const [isVerificationPage, setIsVerificationPage] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+
   const [employeeData, setEmployeeData] = useState({
     name: "",
     email: "",
@@ -187,7 +189,7 @@ export default function LoginPage() {
   };
 const handleRetry = async (e) => {
   e.preventDefault();
-  setIsLoading(true); 
+  setIsVerifying(true);
   try {
     const response = await fetch("/api/auth/resendmail", {
       method: "POST",
@@ -210,7 +212,7 @@ const handleRetry = async (e) => {
   } catch (error) {
     console.error("Error resending email:", error);
   }
-  setIsLoading(false);
+  setIsVerifying(false);
 };
 
   const toggleEmployeeMode = () => {
@@ -312,7 +314,7 @@ const handleRetry = async (e) => {
               verificationCode={verificationCode}
               setVerificationCode={setVerificationCode}
               handleRetry={handleRetry}
-              setIsVerificationPage={setIsVerificationPage}
+              isVerifying={isVerifying}
             />
         )}
       </div>

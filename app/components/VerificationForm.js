@@ -8,8 +8,26 @@ const VerificationForm = ({
   verificationCode,
   setVerificationCode,
   handleRetry,
-  setIsVerificationPage,
+  isVerifying,
 }) => {
+  const [time, setTime] = useState(120);
+
+  useEffect(() => {
+    if (time <= 0) return;
+    const timer = setInterval(() => {
+      setTime((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [time > 0]);
+
+  const handleResend = async (e) => {
+    await handleRetry(e);
+    setTime(120);
+  };
+
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+
   return (
     <>
       <h1 className="text-2xl font-bold text-center mb-4">
@@ -28,14 +46,14 @@ const VerificationForm = ({
             renderInput={(props) => (
               <input
                 {...props}
-                style={{ 
-                  width: 'clamp(30px, 10vw, 50px)',
-                  height: 'clamp(35px, 12vw, 60px)',
-                  fontSize: 'clamp(14px, 4vw, 24px)',
-                  margin: '0 0.2rem',
-                  textAlign: 'center',
-                  border: '2px solid #d1d5db',
-                  borderRadius: '0.5rem',
+                style={{
+                  width: "clamp(30px, 10vw, 50px)",
+                  height: "clamp(35px, 12vw, 60px)",
+                  fontSize: "clamp(14px, 4vw, 24px)",
+                  margin: "0 0.2rem",
+                  textAlign: "center",
+                  border: "2px solid #d1d5db",
+                  borderRadius: "0.5rem",
                 }}
                 className="focus:border-[#ec3338] focus:outline-none"
                 disabled={isLoading}
@@ -49,19 +67,26 @@ const VerificationForm = ({
           disabled={isLoading || verificationCode.length !== 6}
           className="w-full bg-[#ec3338] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#dc2626] transition-colors duration-200 disabled:bg-[#f8b4b4] disabled:cursor-not-allowed"
         >
-          {isLoading ? "VERIFYING..." : "VERIFY"}
+          {isVerifying ? "VERIFYING..." : "VERIFY"}
         </button>
       </form>
 
-      <p className="text-center mt-4 text-gray-600">
+      <div className="text-center mt-4 text-gray-600">
         Code not delivered?{" "}
-        <button
-          onClick={handleRetry}
-          className="text-[#ec3338] hover:underline font-medium"
-        >
-          Resend verification code
-        </button>
-      </p>
+        {time <= 0 ? (
+          <button
+            onClick={handleResend}
+            className="text-[#ec3338] hover:underline font-medium"
+            disabled={isLoading}
+          >
+            Resend Verification Code
+          </button>
+        ) : (
+          <span>
+            Retry in {minutes}:{seconds.toString().padStart(2, "0")}
+          </span>
+        )}
+      </div>
     </>
   );
 };
